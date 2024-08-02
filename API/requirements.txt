@@ -1,0 +1,13 @@
+gunicorn
+firebase-admin
+requests
+bcrypt
+google-cloud
+flask-cors
+Flask==2.0.0
+werkzeug==2.0.0
+flask_cors
+datetime
+PyJWT
+
+

@@ -20,7 +20,7 @@ class Vehicle {
 
   factory Vehicle.fromJson(Map<String, dynamic> json) {
     return Vehicle(
-      imageUrl: json['imageUrl'] ?? '',
+      imageUrl: json['imageurl'] ?? '',
       licensePlate: json['licensePlate'] ?? '',
       make: json['make'] ?? '',
       model: json['model'] ?? '',

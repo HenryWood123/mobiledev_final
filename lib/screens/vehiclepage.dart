@@ -1,11 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:mobiledev_final/models/vehiclemodel.dart';
-import 'package:image_picker/image_picker.dart';
 
 class VehicleListPage extends StatefulWidget {
   @override
@@ -56,42 +53,13 @@ class _VehicleListPageState extends State<VehicleListPage> {
     });
   }
 
-  Future<String> _uploadImageToFirebase(File imageFile) async {
-    try {
-      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      Reference storageReference = FirebaseStorage.instance.ref().child('vehicles/$fileName');
-      UploadTask uploadTask = storageReference.putFile(imageFile);
-      TaskSnapshot snapshot = await uploadTask;
-      String downloadUrl = await snapshot.ref.getDownloadURL();
-      return downloadUrl;
-    } catch (e) {
-      print('Error uploading image: $e');
-      throw Exception('Error uploading image');
-    }
-  }
-
-  void _showEditModal(BuildContext context, Vehicle vehicle) {
-    final TextEditingController licensePlateController = TextEditingController(text: vehicle.licensePlate);
-    final TextEditingController makeController = TextEditingController(text: vehicle.make);
-    final TextEditingController modelController = TextEditingController(text: vehicle.model);
-    final TextEditingController statusController = TextEditingController(text: vehicle.status);
-    final TextEditingController vinController = TextEditingController(text: vehicle.vin);
-    final TextEditingController yearController = TextEditingController(text: vehicle.year.toString());
-
-    String? imageUrl = vehicle.imageUrl;
-
-    Future<void> _pickImage(ImageSource source) async {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: source);
-
-      if (pickedFile != null) {
-        File imageFile = File(pickedFile.path);
-        String uploadedImageUrl = await _uploadImageToFirebase(imageFile);
-        setState(() {
-          imageUrl = uploadedImageUrl;
-        });
-      }
-    }
+  void _showAddVehicleModal(BuildContext context) {
+    final TextEditingController licensePlateController = TextEditingController();
+    final TextEditingController makeController = TextEditingController();
+    final TextEditingController modelController = TextEditingController();
+    final TextEditingController statusController = TextEditingController();
+    final TextEditingController vinController = TextEditingController();
+    final TextEditingController yearController = TextEditingController();
 
     showModalBottomSheet(
       context: context,
@@ -117,31 +85,6 @@ class _VehicleListPageState extends State<VehicleListPage> {
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
-                      ),
-                      SizedBox(height: 10),
-                      if (imageUrl != null && imageUrl!.isNotEmpty)
-                        Image.network(imageUrl!)
-                      else
-                        Container(
-                          height: 200,
-                          width: 200,
-                          color: Colors.grey[300],
-                          child: Icon(Icons.image, size: 50),
-                        ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ElevatedButton.icon(
-                            onPressed: () => _pickImage(ImageSource.gallery),
-                            icon: Icon(Icons.photo_library),
-                            label: Text('Gallery'),
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: () => _pickImage(ImageSource.camera),
-                            icon: Icon(Icons.camera_alt),
-                            label: Text('Camera'),
-                          ),
-                        ],
                       ),
                       SizedBox(height: 10),
                       TextField(
@@ -196,7 +139,7 @@ class _VehicleListPageState extends State<VehicleListPage> {
                       ElevatedButton(
                         onPressed: () async {
                           final newVehicle = Vehicle(
-                            imageUrl: imageUrl ?? '',
+                            imageUrl: '', // No image URL since we're not handling images
                             licensePlate: licensePlateController.text,
                             make: makeController.text,
                             model: modelController.text,
@@ -391,16 +334,7 @@ class _VehicleListPageState extends State<VehicleListPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Handle the add vehicle action
-          _showEditModal(context, Vehicle(
-            imageUrl: '',
-            licensePlate: '',
-            make: '',
-            model: '',
-            status: '',
-            vin: '',
-            year: 0,
-          ));
+          _showAddVehicleModal(context);
         },
         child: Icon(Icons.add),
         backgroundColor: Color.fromRGBO(62, 92, 67, 1),

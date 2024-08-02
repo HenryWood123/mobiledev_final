@@ -10,7 +10,7 @@ class User {
     required this.email,
     required this.phone,
     // required this.address,
-    required this.photoUrl,
+    this.photoUrl = '',
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -19,7 +19,7 @@ class User {
       email: json['email'] ?? '',
       phone: json['contactNumber'] ?? '',
       // address: json['address'] ?? '',
-      photoUrl: json['photoUrl'] ?? '',
+      photoUrl: json['imageurl'] ?? '',
     );
   }
 }

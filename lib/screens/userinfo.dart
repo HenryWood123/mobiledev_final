@@ -196,8 +196,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   onTap: () async {
                     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
                     if (pickedFile != null) {
-                      // Handle the picked image file
-                      print('Picked file: ${pickedFile.path}');
+                      setState(() {
+                        _image = File(pickedFile.path);
+                      });
+                      _uploadImage();
                     }
                     Navigator.of(context).pop();
                   },
@@ -208,8 +210,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   onTap: () async {
                     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
                     if (pickedFile != null) {
-                      // Handle the picked image file
-                      print('Picked file: ${pickedFile.path}');
+                      setState(() {
+                        _image = File(pickedFile.path);
+                      });
+                      _uploadImage();
                     }
                     Navigator.of(context).pop();
                   },
@@ -250,11 +254,11 @@ class _UserInfoPageState extends State<UserInfoPage> {
     );
 
     if (response.statusCode == 200) {
-      // Handle successful update
-      print('Profile picture updated successfully');
+      setState(() {
+        user.photoUrl = imageUrl;
+      });
     } else {
-      // Handle failed update
-      print('Profile picture update failed');
+      print('Profile picture update failed: ${response.statusCode}');
     }
   }
 
@@ -263,117 +267,117 @@ class _UserInfoPageState extends State<UserInfoPage> {
     final pageWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
+        appBar: AppBar(
         title: Center(
-          child: Image.asset(
-            'assets/images/fleet-tracker-high-resolution-logo-transparent.png', // Replace with your logo path
-            height: 40, // Adjust the height as needed
-          ),
-        ),
-        backgroundColor: Color.fromRGBO(62, 92, 67, 1),
-      ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white, // Background color changed to white
-        ),
-        child: isLoading
-            ? Center(child: CircularProgressIndicator())
-            : errorMessage != null
-            ? Center(child: Text('Error: $errorMessage'))
-            : SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                ),
-                child: Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundImage: AssetImage('assets/images/user_photo.png'), // Replace with your user photo
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      user.name,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      user.email,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    ListTile(
-                      leading: Icon(Icons.phone, color: Color.fromRGBO(62, 92, 67, 1)),
-                      title: Text(
-                        user.phone,
-                        style: TextStyle(color: Colors.black),
-                      ),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.email, color: Color.fromRGBO(62, 92, 67, 1)),
-                      title: Text(
-                        user.email,
-                        style: TextStyle(color: Colors.black),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    _showEditModal(context);
-                  },
-                  icon: Icon(Icons.edit),
-                  label: Text('Edit Information'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(62, 92, 67, 1), // Button color
-                    foregroundColor: Colors.white, // Text color
-                    minimumSize: Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    _showImageSourceActionSheet(context);
-                  },
-                  icon: Icon(Icons.upload),
-                  label: Text('Upload Profile Picture'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(62, 92, 67, 1), // Button color
-                    foregroundColor: Colors.white, // Text color
-                    minimumSize: Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      // bottomNavigationBar: BottomNavBar(currentIndex: 1),
-    );
+        child: Image.asset(
+        'assets/images/fleet-tracker-high-resolution-logo-transparent.png', // Replace with your logo path
+        height: 40, // Adjust the height as needed
+    ),
+    ),
+    backgroundColor: Color.fromRGBO(62, 92, 67, 1),
+    ),
+    body: Container(
+    width: double.infinity,
+    height: double.infinity,
+    decoration: BoxDecoration(
+    color: Colors.white, // Background color changed to white
+    ),
+    child: isLoading
+    ? Center(child: CircularProgressIndicator())
+        : errorMessage != null
+    ? Center(child: Text('Error: $errorMessage'))
+        : SingleChildScrollView(
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+    Container(
+    width: double.infinity,
+    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+    decoration: BoxDecoration(
+    color: Colors.white,
+    ),
+    child: Column(
+    children: [
+    CircleAvatar(
+    radius: 50,
+    backgroundImage: user.photoUrl.isNotEmpty
+    ? NetworkImage(user.photoUrl)
+        : AssetImage('assets/images/user_photo.png') as ImageProvider,
+    ),
+    SizedBox(height: 10),
+    Text(
+    user.name,
+    style: TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+    ),
+    ),
+    Text(
+    user.email,
+    style: TextStyle(
+    fontSize: 16,
+    color: Colors.grey,
+    ),
+    ),
+    SizedBox(height: 20),
+    ListTile(
+    leading: Icon(Icons.phone, color: Color.fromRGBO(62, 92, 67, 1)),
+    title: Text(
+    user.phone,
+    style: TextStyle(color: Colors.black),
+    ),
+    ),
+    ListTile(
+    leading: Icon(Icons.email, color: Color.fromRGBO(62, 92, 67, 1)),
+    title: Text(
+    user.email,
+    style: TextStyle(color: Colors.black),
+    ),
+    ),
+    SizedBox(height: 20),
+    ],
+    ),
+    ),
+    Padding(
+    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    child: ElevatedButton.icon(
+    onPressed: () {
+    _showEditModal(context);
+    },
+    icon: Icon(Icons.edit),
+    label: Text('Edit Information'),
+    style: ElevatedButton.styleFrom(
+    backgroundColor: Color.fromRGBO(62, 92, 67, 1), // Button color
+    foregroundColor: Colors.white, // Text color
+    minimumSize: Size(double.infinity, 50),
+    shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(10),
+    ),
+    ),
+    ),
+    ),
+    Padding(
+    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    child: ElevatedButton.icon(
+    onPressed: () {
+    _showImageSourceActionSheet(context);
+    },
+    icon: Icon(Icons.upload),
+    label: Text('Upload Profile Picture'),
+    style: ElevatedButton.styleFrom(
+    backgroundColor: Color.fromRGBO(62, 92, 67, 1), // Button color
+    foregroundColor: Colors.white, // Text color
+    minimumSize: Size(double.infinity, 50),
+    shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(10),
+    ),
+    ),
+    ),
+    ),
+    ],
+    ),
+    ),
+    ));
   }
 
   Widget _buildInfoTile(IconData icon, String info) {
